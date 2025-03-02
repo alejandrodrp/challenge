@@ -1,7 +1,9 @@
 from sqlalchemy import Column, String, Integer
+from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 from app.models.mixins import SoftDeleteMixin, TimestampMixin
+from app.models.doctor_especialidad import doctor_especialidad
 
 
 class Especialidad(Base, SoftDeleteMixin, TimestampMixin):
@@ -11,3 +13,8 @@ class Especialidad(Base, SoftDeleteMixin, TimestampMixin):
     nombre = Column(String(100), unique=True, nullable=False)
     descripcion = Column(String(255), nullable=True)
 
+    doctores = relationship(
+        "Doctor",
+        secondary=doctor_especialidad,
+        back_populates="especialidades"
+    )
