@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Integer, Boolean
 
-from mixins import SoftDeleteMixin, TimestampMixin, Base
+from app.core.database import Base
+from app.models.mixins import SoftDeleteMixin, TimestampMixin
 
 
 class Doctor(Base, SoftDeleteMixin, TimestampMixin):

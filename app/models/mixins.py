@@ -1,6 +1,5 @@
 import datetime
 from sqlalchemy import Column, Boolean, DateTime, func
-from sqlalchemy.ext.declarative import declarative_base
 
 
 class SoftDeleteMixin:
@@ -16,8 +15,7 @@ class SoftDeleteMixin:
 
 class TimestampMixin:
     """Mixin para gestionar los campos de timestamps: created_at y updated_at."""
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-
-Base = declarative_base()
+    created_at = Column(DateTime(timezone=True),
+                        server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True),
+                        server_default=func.now(), onupdate=func.now())
