@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from app.controllers.base_controller import BaseController
+from app.controllers.auth_controller import auth_router
 
 # Schemas
 from app.views.cita import cita_schemas
@@ -10,6 +11,8 @@ from app.views.historial_medico import historial_medico_schemas
 from app.views.doctor import doctor_schemas
 from app.views.especialidad import especialidad_schemas
 from app.views.doctor_especialidad import doctor_especialidad_schemas
+from app.views.user import user_schemas
+
 
 # Models
 from app.models.cita import Cita
@@ -20,6 +23,7 @@ from app.models.historial_medico import HistorialMedico
 from app.models.doctor import Doctor
 from app.models.especialidad import Especialidad
 from app.models.doctor_especialidad import doctor_especialidad
+from app.models.user import User
 
 central_router = APIRouter()
 
@@ -48,3 +52,6 @@ central_router.include_router(
 central_router.include_router(
     BaseController(model=Doctor, schemas=doctor_especialidad_schemas).router, prefix='/doctor_especialidad', tags=["Doctor", "Especialidad"]
 )
+# TODO hacer un user controller para manejar superuser
+
+central_router.include_router(auth_router, prefix="/auth", tags=["Auth"])

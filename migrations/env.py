@@ -6,7 +6,7 @@ from alembic import context
 from app.core.database import DATABASE_URL, Base
 
 # Importar todos los modelos
-from app.models import cita, tratamiento, seguro_medico, paciente, historial_medico, especialidad, doctor
+from app.models import cita, tratamiento, seguro_medico, paciente, historial_medico, especialidad, doctor, user
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
