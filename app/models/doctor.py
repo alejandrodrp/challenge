@@ -22,3 +22,5 @@ class Doctor(Base, SoftDeleteMixin, TimestampMixin):
         secondary=doctor_especialidad,
         back_populates="doctores"
     )
+
+    citas = relationship("Cita", back_populates="doctor")
