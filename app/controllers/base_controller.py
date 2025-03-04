@@ -1,5 +1,5 @@
 from typing import Type, TypeVar, Generic, List, Dict
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException, Body, Query
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,12 +27,12 @@ class BaseController(Generic[ModelType, SchemaType]):
 
     def _add_routes(self):
         @self.router.get("/", response_model=List[self._get_schema("get", "output")])
-        async def read_items(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_session), current_user: UserPublic = Depends(get_current_active_user)):
-            return await self.repository.get_all(db, skip=skip, limit=limit)
+        async def read_items(skip: int = 0, limit: int = 100, include_deleted: bool = Query(False), db: AsyncSession = Depends(get_session), current_user: UserPublic = Depends(get_current_active_user)):
+            return await self.repository.get_all(db, skip=skip, limit=limit, include_deleted=include_deleted)
 
         @self.router.get("/{item_id}", response_model=self._get_schema("get", "output"))
-        async def read_item(item_id: int, db: AsyncSession = Depends(get_session), current_user: UserPublic = Depends(get_current_active_user)):
-            db_item = await self.repository.get(db, id=item_id)
+        async def read_item(item_id: int, include_deleted: bool = Query(False), db: AsyncSession = Depends(get_session), current_user: UserPublic = Depends(get_current_active_user)):
+            db_item = await self.repository.get(db, id=item_id, include_deleted=include_deleted)
             if db_item is None:
                 raise HTTPException(status_code=404, detail="Item not found")
             return db_item
@@ -48,21 +48,28 @@ class BaseController(Generic[ModelType, SchemaType]):
             return self._get_schema("post", "output").model_validate(db_obj)
 
         @self.router.put("/{item_id}", response_model=self._get_schema("put", "output"))
-        async def update_item(item_id: int, item_in: dict = Body(...), db: AsyncSession = Depends(get_session), current_user: UserPublic = Depends(get_current_active_user)):
+        async def update_item(item_id: int, item_in: dict = Body(...), include_deleted: bool = Query(False), db: AsyncSession = Depends(get_session), current_user: UserPublic = Depends(get_current_active_user)):
             schema = self._get_schema("put", "input")
             try:
                 item_in = schema.model_validate(item_in)
             except ValidationError as e:
                 raise HTTPException(status_code=422, detail=e.errors())
-            db_item = await self.repository.get(db, id=item_id)
+            db_item = await self.repository.get(db, id=item_id, include_deleted=include_deleted)
             if db_item is None:
                 raise HTTPException(status_code=404, detail="Item not found")
             db_obj = await self.repository.update(db, db_obj=db_item, obj_in=item_in)
             return self._get_schema("put", "output").model_validate(db_obj)
 
         @self.router.delete("/{item_id}", response_model=self._get_schema("delete", "output"))
-        async def delete_item(item_id: int, db: AsyncSession = Depends(get_session), current_user: UserPublic = Depends(get_current_active_user)):
+        async def delete_item(item_id: int, db: AsyncSession = Depends(get_session), soft: bool = Query(True), current_user: UserPublic = Depends(get_current_active_user)):
             db_item = await self.repository.get(db, id=item_id)
             if db_item is None:
                 raise HTTPException(status_code=404, detail="Item not found")
+            if soft:
+                db_item.is_deleted = True
+                db.add(db_item)
+                await db.commit()
+                await db.refresh(db_item)
+                return db_item
+            
             return await self.repository.remove(db, id=item_id)

@@ -14,12 +14,18 @@ class BaseRepository(Generic[ModelType, T]):
     def __init__(self, model: Type[ModelType]):
         self.model = model
 
-    async def get(self, db: AsyncSession, id: int) -> Optional[ModelType]:
-        result = await db.execute(select(self.model).filter(self.model.id == id))
+    async def get(self, db: AsyncSession, id: int, include_deleted: bool = False) -> Optional[ModelType]:
+        query = select(self.model).filter(self.model.id == id)
+        if not include_deleted:
+            query = query.filter(self.model.is_deleted == False)
+        result = await db.execute(query)
         return result.scalars().first()
 
-    async def get_all(self, db: AsyncSession, skip: int = 0, limit: int = 100) -> List[ModelType]:
-        result = await db.execute(select(self.model).offset(skip).limit(limit))
+    async def get_all(self, db: AsyncSession, skip: int = 0, limit: int = 100, include_deleted: bool = False) -> List[ModelType]:
+        query = select(self.model).offset(skip).limit(limit)
+        if not include_deleted:
+            query = query.filter(self.model.is_deleted == False)
+        result = await db.execute(query)
         return result.scalars().all()
 
     async def create(self, db: AsyncSession, obj_in: T) -> ModelType:

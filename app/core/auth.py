@@ -37,7 +37,7 @@ def create_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 async def get_user(db: AsyncSession, username: str):
-    result = await db.execute(select(User).filter(User.username == username))
+    result = await db.execute(select(User).filter(User.username == username, User.is_deleted == False))
     return result.scalars().first()
 
 async def authenticate_user(db: AsyncSession, username: str, password: str):
