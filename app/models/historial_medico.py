@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from app.core.database import Base
 from app.models.mixins import SoftDeleteMixin, TimestampMixin
 
+
 class HistorialMedico(Base, SoftDeleteMixin, TimestampMixin):
     __tablename__ = "historial_medico"
 

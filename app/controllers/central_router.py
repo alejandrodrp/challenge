@@ -23,7 +23,7 @@ from app.models.seguro_medico import SeguroMedico
 from app.models.historial_medico import HistorialMedico
 from app.models.doctor import Doctor
 from app.models.especialidad import Especialidad
-from app.models.doctor_especialidad import doctor_especialidad
+from app.models.doctor_especialidad import DoctorEspecialidad
 from app.models.user import User
 
 central_router = APIRouter()
@@ -51,7 +51,7 @@ central_router.include_router(
     BaseController(model=Especialidad, schemas=especialidad_schemas).router, prefix="/especialidad", tags=["Especialidad"]
 )
 central_router.include_router(
-    BaseController(model=doctor_especialidad, schemas=doctor_especialidad_schemas).router, prefix='/doctor_especialidad', tags=["Doctor", "Especialidad"]
+    BaseController(model=DoctorEspecialidad, schemas=doctor_especialidad_schemas).router, prefix='/doctor_especialidad', tags=["Doctor", "Especialidad"]
 )
 central_router.include_router(
     UserController(model=User, schemas=user_schemas).router, prefix='/user', tags=["Users"]

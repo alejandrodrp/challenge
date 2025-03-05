@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 from app.models.mixins import SoftDeleteMixin, TimestampMixin
-from app.models.doctor_especialidad import doctor_especialidad
+from app.models.doctor_especialidad import DoctorEspecialidad
 
 
 class Doctor(Base, SoftDeleteMixin, TimestampMixin):
@@ -18,9 +18,8 @@ class Doctor(Base, SoftDeleteMixin, TimestampMixin):
     activo = Column(Boolean, default=True)
 
     especialidades = relationship(
-        "Especialidad",
-        secondary=doctor_especialidad,
-        back_populates="doctores"
+        "DoctorEspecialidad",
+        back_populates="doctor"
     )
 
     citas = relationship("Cita", back_populates="doctor")

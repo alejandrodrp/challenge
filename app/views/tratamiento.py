@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class TratamientoBase(BaseModel):
     nombre: str
     descripcion: str
@@ -7,17 +8,21 @@ class TratamientoBase(BaseModel):
     duracion_dias: int
     historial_medico_id: int
 
+
 class TratamientoCreate(TratamientoBase):
     pass
 
+
 class TratamientoUpdate(TratamientoBase):
     pass
+
 
 class TratamientoInDBBase(TratamientoBase):
     id: int
 
     class Config:
         from_attributes = True
+
 
 class Tratamiento(TratamientoInDBBase):
     pass

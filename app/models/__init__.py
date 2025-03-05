@@ -1,6 +1,6 @@
 from app.models.cita import Cita
 from app.models.doctor import Doctor
-from app.models.doctor_especialidad import doctor_especialidad
+from app.models.doctor_especialidad import DoctorEspecialidad
 from app.models.especialidad import Especialidad
 from app.models.historial_medico import HistorialMedico
 from app.models.paciente import Paciente

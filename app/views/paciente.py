@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import date
 
+
 class PacienteBase(BaseModel):
     nombre: str
     apellido: str
@@ -10,17 +11,21 @@ class PacienteBase(BaseModel):
     email: str
     seguro_medico_id: int
 
+
 class PacienteCreate(PacienteBase):
     pass
 
+
 class PacienteUpdate(PacienteBase):
     pass
+
 
 class PacienteInDBBase(PacienteBase):
     id: int
 
     class Config:
         from_attributes = True
+
 
 class Paciente(PacienteInDBBase):
     pass
