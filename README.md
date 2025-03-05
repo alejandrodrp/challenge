@@ -53,7 +53,7 @@ pip install -r requirements.txt
 Crea un archivo .env en el directorio raíz del proyecto con las siguientes variables:
 
 ```env
-DB_HOST=
+DB_HOST=  # si se usa localhost, dentro de docker debe ponerse `host.docker.internal`
 DB_USER=
 DB_PASSWORD=
 DB_PORT=
