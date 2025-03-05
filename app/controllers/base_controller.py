@@ -1,8 +1,8 @@
 from typing import Type, TypeVar, Generic, List, Dict
+
 from fastapi import APIRouter, Depends, HTTPException, Body, Query
-from fastapi.encoders import jsonable_encoder
-from fastapi.exceptions import RequestValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func
 from pydantic import BaseModel, ValidationError
 
 from app.core.database import get_session
@@ -27,8 +27,8 @@ class BaseController(Generic[ModelType, SchemaType]):
 
     def _add_routes(self):
         @self.router.get("/", response_model=List[self._get_schema("get", "output")])
-        async def read_items(skip: int = 0, limit: int = 100, include_deleted: bool = Query(False), db: AsyncSession = Depends(get_session), current_user: UserPublic = Depends(get_current_active_user)):
-            return await self.repository.get_all(db, skip=skip, limit=limit, include_deleted=include_deleted)
+        async def read_items(page_size: int = Query(10), limit: int = Query(None), page: int = 1, include_deleted: bool = Query(False), db: AsyncSession = Depends(get_session), current_user: UserPublic = Depends(get_current_active_user)):
+            return await self.repository.get_all(db, page_size=page_size, page=page, limit=limit, include_deleted=include_deleted)
 
         @self.router.get("/{item_id}", response_model=self._get_schema("get", "output"))
         async def read_item(item_id: int, include_deleted: bool = Query(False), db: AsyncSession = Depends(get_session), current_user: UserPublic = Depends(get_current_active_user)):
@@ -67,6 +67,7 @@ class BaseController(Generic[ModelType, SchemaType]):
                 raise HTTPException(status_code=404, detail="Item not found")
             if soft:
                 db_item.is_deleted = True
+                db_item.deleted_at = func.now()
                 db.add(db_item)
                 await db.commit()
                 await db.refresh(db_item)

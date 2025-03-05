@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from typing import AsyncGenerator
 
-# Corregir el formateo de la cadena de la URL de la base de datos
+
 DATABASE_URL = f"postgresql+asyncpg://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@{getenv('DB_HOST')}:{getenv('DB_PORT')}/{getenv('DB_NAME')}"
 
 engine = create_async_engine(DATABASE_URL, echo=True)
@@ -14,6 +14,7 @@ async_session = sessionmaker(
     expire_on_commit=False,
     class_=AsyncSession
 )
+
 
 # Dependencia para obtener una sesión asíncrona en los endpoints
 async def get_session() -> AsyncGenerator[AsyncSession, None]:

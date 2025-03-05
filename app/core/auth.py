@@ -20,11 +20,14 @@ REFRESH_TOKEN_LIFETIME = int(os.getenv('REFRESH_TOKEN_LIFETIME'))
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
+
 def get_password_hash(password):
     return pwd_context.hash(password)
+
 
 def create_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -36,9 +39,11 @@ def create_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 async def get_user(db: AsyncSession, username: str):
     result = await db.execute(select(User).filter(User.username == username, User.is_deleted == False))
     return result.scalars().first()
+
 
 async def authenticate_user(db: AsyncSession, username: str, password: str):
     user = await get_user(db, username)
@@ -47,6 +52,7 @@ async def authenticate_user(db: AsyncSession, username: str, password: str):
     if not verify_password(password, user.hashed_password):
         return False
     return user
+
 
 async def get_current_user(db: AsyncSession = Depends(get_session), token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -65,6 +71,7 @@ async def get_current_user(db: AsyncSession = Depends(get_session), token: str =
     if user is None:
         raise credentials_exception
     return user
+
 
 async def get_current_active_user(current_user: UserPublic = Depends(get_current_user)):
     if not current_user.is_active:

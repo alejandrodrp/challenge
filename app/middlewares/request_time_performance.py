@@ -3,8 +3,8 @@ from starlette.requests import Request
 import time
 import logging
 
-
 logger = logging.getLogger("uvicorn")
+
 
 class RequestTimePerformanceMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):

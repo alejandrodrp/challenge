@@ -13,8 +13,10 @@ from app.models.user import User
 
 auth_router = APIRouter()
 
+
 @auth_router.post("/token", response_model=dict)
-async def login_for_access_token(db: AsyncSession = Depends(get_session), form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(db: AsyncSession = Depends(get_session),
+                                 form_data: OAuth2PasswordRequestForm = Depends()):
     user = await authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -31,6 +33,7 @@ async def login_for_access_token(db: AsyncSession = Depends(get_session), form_d
         data={"sub": user.username}, expires_delta=refresh_token_expires
     )
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+
 
 @auth_router.post("/refresh-token", response_model=dict)
 async def refresh_access_token(refresh_token: dict = Body(...), db: AsyncSession = Depends(get_session)):
@@ -55,6 +58,7 @@ async def refresh_access_token(refresh_token: dict = Body(...), db: AsyncSession
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 @auth_router.post("/register", response_model=UserPublic)
 async def register_user(user: UserCreate, db: AsyncSession = Depends(get_session)):
     hashed_password = get_password_hash(user.password)
@@ -62,8 +66,7 @@ async def register_user(user: UserCreate, db: AsyncSession = Depends(get_session
         username=user.username,
         email=user.email,
         hashed_password=hashed_password,
-        is_active=user.is_active,
-        is_superuser=user.is_superuser,
+        is_active=user.is_active
     )
     db.add(db_user)
     await db.commit()

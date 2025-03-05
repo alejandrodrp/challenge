@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from app.controllers.base_controller import BaseController
 from app.controllers.auth_controller import auth_router
+from app.controllers.user_controller import UserController
 
 # Schemas
 from app.views.cita import cita_schemas
@@ -50,8 +51,10 @@ central_router.include_router(
     BaseController(model=Especialidad, schemas=especialidad_schemas).router, prefix="/especialidad", tags=["Especialidad"]
 )
 central_router.include_router(
-    BaseController(model=Doctor, schemas=doctor_especialidad_schemas).router, prefix='/doctor_especialidad', tags=["Doctor", "Especialidad"]
+    BaseController(model=doctor_especialidad, schemas=doctor_especialidad_schemas).router, prefix='/doctor_especialidad', tags=["Doctor", "Especialidad"]
 )
-# TODO hacer un user controller para manejar superuser
+central_router.include_router(
+    UserController(model=User, schemas=user_schemas).router, prefix='/user', tags=["Users"]
+)
 
 central_router.include_router(auth_router, prefix="/auth", tags=["Auth"])
