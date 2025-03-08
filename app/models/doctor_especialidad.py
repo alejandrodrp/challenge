@@ -1,14 +1,15 @@
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.core.database import Base
+# from app.models import Doctor, Especialidad
 from app.models.mixins import TimestampMixin, SoftDeleteMixin
 
 
 class DoctorEspecialidad(Base, TimestampMixin, SoftDeleteMixin):
     __tablename__ = 'doctor_especialidad'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    doctor_id = Column(Integer, ForeignKey('doctor.id'), primary_key=True)
-    especialidad_id = Column(Integer, ForeignKey('especialidad.id'), primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    doctor_id: Mapped[int] = mapped_column(ForeignKey('doctor.id'), primary_key=True)
+    especialidad_id: Mapped[int] = mapped_column(ForeignKey('especialidad.id'), primary_key=True)
 
-    doctor = relationship("Doctor", back_populates="especialidades")
-    especialidad = relationship("Especialidad", back_populates="doctores")
+    doctor: Mapped["Doctor"] = relationship(back_populates="especialidades")
+    especialidad: Mapped["Especialidad"] = relationship(back_populates="doctores")
