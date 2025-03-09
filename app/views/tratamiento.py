@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from app.views.types.output_input_schemas import OperationSchemaType
 
 
 class TratamientoBase(BaseModel):
@@ -20,15 +21,14 @@ class TratamientoUpdate(TratamientoBase):
 class TratamientoInDBBase(TratamientoBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Tratamiento(TratamientoInDBBase):
     pass
 
 
-tratamiento_schemas = {
+tratamiento_schemas: OperationSchemaType = {
     "get": {"input": TratamientoBase, "output": TratamientoInDBBase},
     "post": {"input": TratamientoBase, "output": TratamientoInDBBase},
     "put": {"input": TratamientoBase, "output": TratamientoInDBBase},

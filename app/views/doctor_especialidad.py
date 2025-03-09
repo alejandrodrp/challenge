@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from app.views.types.output_input_schemas import OperationSchemaType
 
 
 class DoctorEspecialidadBase(BaseModel):
@@ -15,15 +16,16 @@ class DoctorEspecialidadUpdate(DoctorEspecialidadBase):
 
 
 class DoctorEspecialidadInDBBase(DoctorEspecialidadBase):
-    class Config:
-        from_attributes = True
+    id: int
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DoctorEspecialidad(DoctorEspecialidadInDBBase):
     pass
 
 
-doctor_especialidad_schemas = {
+doctor_especialidad_schemas: OperationSchemaType = {
     "get": {"input": DoctorEspecialidadBase, "output": DoctorEspecialidadInDBBase},
     "post": {"input": DoctorEspecialidadBase, "output": DoctorEspecialidadInDBBase},
     "put": {"input": DoctorEspecialidadBase, "output": DoctorEspecialidadInDBBase},
