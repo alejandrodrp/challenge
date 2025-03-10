@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 from datetime import date
 from app.views.types.output_input_schemas import OperationSchemaType
 
@@ -9,7 +9,7 @@ class PacienteBase(BaseModel):
     fecha_nacimiento: date
     direccion: str
     telefono: str
-    email: str
+    email: EmailStr
     seguro_medico_id: int
 
 

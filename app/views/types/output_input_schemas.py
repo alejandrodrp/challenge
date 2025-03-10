@@ -1,16 +1,17 @@
-from typing import Generic, Type, TypeVar, TypedDict
+from typing import Type, TypeAlias, TypedDict
 
-TInput = TypeVar("TInput")
-TOutput = TypeVar("TOutput")
+from pydantic import BaseModel
 
-
-class SchemaPair(Generic[TInput, TOutput], TypedDict):
-    input: Type[TInput]
-    output: Type[TOutput]
+TSchema: TypeAlias = Type[BaseModel]
 
 
-class OperationSchemaType(Generic[TInput, TOutput], TypedDict):
-    get: SchemaPair[TInput, TOutput]
-    post: SchemaPair[TInput, TOutput]
-    put: SchemaPair[TInput, TOutput]
-    delete: SchemaPair[TInput, TOutput]
+class SchemaPair(TypedDict):
+    input: TSchema
+    output: TSchema
+
+
+class OperationSchemaType(TypedDict):
+    get: SchemaPair
+    post: SchemaPair
+    put: SchemaPair
+    delete: SchemaPair

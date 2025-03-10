@@ -1,20 +1,29 @@
-from typing import Type, Dict
-from fastapi import Depends, HTTPException
+from typing import Annotated
+
+from fastapi import Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func
+
 from app.core.auth import get_current_active_user
 from app.models.user import User
 from app.views.user import UserPublic
 from app.core.database import get_session
 from app.controllers.base_controller import BaseController
+from app.views.types.output_input_schemas import OperationSchemaType
+
 
 class UserController(BaseController[User, UserPublic]):
-    def __init__(self, model: Type[User], schemas: Dict[str, Dict[str, Type[UserPublic]]]):
+    def __init__(self, model: type[User], schemas: OperationSchemaType):
         super().__init__(model, schemas)
 
     def _add_routes(self):
         @self.router.delete("/{item_id}", response_model=self._get_schema("delete", "output"))
-        async def delete_item(item_id: int, db: AsyncSession = Depends(get_session), soft: bool = True, current_user: UserPublic = Depends(get_current_active_user)):
+        async def delete_item(
+                item_id: int,
+                db: AsyncSession = Depends(get_session),
+                soft: Annotated[bool, Query()] = True,
+                current_user: UserPublic = Depends(get_current_active_user)
+        ):
             if not current_user.is_superuser:
                 raise HTTPException(status_code=403, detail="Only superusers can delete users")
             db_item = await self.repository.get(db, id=item_id)
@@ -27,7 +36,7 @@ class UserController(BaseController[User, UserPublic]):
                 await db.commit()
                 await db.refresh(db_item)
                 return db_item
-            
+
             return await self.repository.remove(db, id=item_id)
 
         super()._add_routes()

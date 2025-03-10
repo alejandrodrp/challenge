@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 from app.views.types.output_input_schemas import OperationSchemaType
 
 
@@ -6,7 +6,7 @@ class DoctorBase(BaseModel):
     nombre: str
     apellido: str
     telefono: str
-    email: str
+    email: EmailStr
     licencia_medica: str
     activo: bool
 
