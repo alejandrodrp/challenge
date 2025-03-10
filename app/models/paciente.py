@@ -1,22 +1,29 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
-from sqlalchemy.orm import relationship
+from datetime import datetime
+from typing import List
+
+from sqlalchemy import String, ForeignKey
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from app.core.database import Base
+# from app.models import SeguroMedico, Cita, HistorialMedico
 from app.models.mixins import SoftDeleteMixin, TimestampMixin
 
 
 class Paciente(Base, SoftDeleteMixin, TimestampMixin):
     __tablename__ = "paciente"
     
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    nombre = Column(String(100), nullable=False)
-    apellido = Column(String(100), nullable=False)
-    fecha_nacimiento = Column(Date, nullable=False)
-    direccion = Column(String(255), nullable=True)
-    telefono = Column(String(20), nullable=True)
-    email = Column(String(100), unique=True, nullable=True)
-    seguro_medico_id = Column(Integer, ForeignKey('seguro_medico.id'), nullable=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    nombre: Mapped[str] = mapped_column(String(100), nullable=False)
+    apellido: Mapped[str] = mapped_column(String(100), nullable=False)
+    fecha_nacimiento: Mapped[datetime] = mapped_column(nullable=False)
+    direccion: Mapped[str] = mapped_column(String(255), nullable=True)
+    telefono: Mapped[str] = mapped_column(String(20), nullable=True)
+    email: Mapped[str] = mapped_column(String(100), unique=True, nullable=True)
+    seguro_medico_id: Mapped[int] = mapped_column(ForeignKey('seguro_medico.id'), nullable=True)
 
-    seguro_medico = relationship("SeguroMedico", back_populates="pacientes")
-    citas = relationship("Cita", back_populates="paciente")
-    historial_medico = relationship("HistorialMedico", back_populates="paciente", uselist=False)
+    seguro_medico: Mapped["SeguroMedico"] = relationship(
+        back_populates="pacientes")
+    citas: Mapped[List["Cita"]] = relationship(
+        back_populates="paciente")
+    historial_medico: Mapped["HistorialMedico"] = relationship(
+        back_populates="paciente")

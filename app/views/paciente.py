@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, EmailStr
 from datetime import date
+from app.views.types.output_input_schemas import OperationSchemaType
 
 
 class PacienteBase(BaseModel):
@@ -8,7 +9,7 @@ class PacienteBase(BaseModel):
     fecha_nacimiento: date
     direccion: str
     telefono: str
-    email: str
+    email: EmailStr
     seguro_medico_id: int
 
 
@@ -23,15 +24,14 @@ class PacienteUpdate(PacienteBase):
 class PacienteInDBBase(PacienteBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Paciente(PacienteInDBBase):
     pass
 
 
-paciente_schemas = {
+paciente_schemas: OperationSchemaType = {
     "get": {"input": PacienteBase, "output": PacienteInDBBase},
     "post": {"input": PacienteBase, "output": PacienteInDBBase},
     "put": {"input": PacienteBase, "output": PacienteInDBBase},

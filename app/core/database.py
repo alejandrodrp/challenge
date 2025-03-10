@@ -1,25 +1,29 @@
 from os import getenv
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from typing import AsyncGenerator
 
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
-DATABASE_URL = f"postgresql+asyncpg://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@{getenv('DB_HOST')}:{getenv('DB_PORT')}/{getenv('DB_NAME')}"
+# Construir la URL de la base de datos; se asume que todas las variables de entorno están definidas.
+DATABASE_URL: str = (
+    f"postgresql+asyncpg://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}"
+    f"@{getenv('DB_HOST')}:{getenv('DB_PORT')}/{getenv('DB_NAME')}"
+)
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+# Crear el engine asíncrono; se especifica el tipo AsyncEngine.
+engine: AsyncEngine = create_async_engine(DATABASE_URL, echo=True)
 
-async_session = sessionmaker(
+async_session: sessionmaker[AsyncSession] = sessionmaker(
     engine,
     expire_on_commit=False,
-    class_=AsyncSession
+    class_=AsyncSession,
 )
 
 
-# Dependencia para obtener una sesión asíncrona en los endpoints
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
         yield session
 
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass

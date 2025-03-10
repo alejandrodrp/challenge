@@ -1,7 +1,7 @@
-from typing import Generic, Type, TypeVar, List, Optional
+from typing import Generic, Type, TypeVar, Optional, Sequence
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy import func
+from sqlalchemy import select, func
 from pydantic import BaseModel
 
 
@@ -11,28 +11,28 @@ ModelType = TypeVar('ModelType')
 
 
 class BaseRepository(Generic[ModelType, T]):
-    def __init__(self, model: Type[ModelType]):
+    def __init__(self, model: Type[ModelType]) -> None:
         self.model = model
 
     async def get(self, db: AsyncSession, id: int, include_deleted: bool = False) -> Optional[ModelType]:
-        query = select(self.model).filter(self.model.id == id)
+        query = select(self.model).where(self.model.id == id)
         if not include_deleted:
-            query = query.filter(self.model.is_deleted == False)
+            query = query.where(self.model.is_deleted == False)
         result = await db.execute(query)
-        return result.scalars().first()
+        return result.scalar_one_or_none()
 
     async def get_all(self, db: AsyncSession, page_size: int = 10, page: int = 1, limit: int = None,
-                      include_deleted: bool = False) -> List[ModelType]:
+                      include_deleted: bool = False) -> Sequence[ModelType]:
         offset = (page - 1) * page_size
         base_query = select(self.model)
 
         if not include_deleted:
-            base_query = base_query.filter(self.model.is_deleted == False)
+            base_query = base_query.where(self.model.is_deleted == False)
 
         # Consulta para obtener el total de registros reales
-        count_query = select(func.count()).select_from(self.model)
+        count_query = select(func.count(self.model.id))
         if not include_deleted:
-            count_query = count_query.filter(self.model.is_deleted == False)
+            count_query = count_query.where(self.model.is_deleted == False)
         if limit:
             count_query = count_query.limit(limit)
         total_result = await db.execute(count_query)
@@ -65,11 +65,9 @@ class BaseRepository(Generic[ModelType, T]):
         return db_obj
 
     async def update(self, db: AsyncSession, db_obj: ModelType, obj_in: T) -> ModelType:
-        obj_data = vars(db_obj)
         update_data = obj_in.model_dump(exclude_unset=True)
-        for field in obj_data:
-            if field in update_data:
-                setattr(db_obj, field, update_data[field])
+        for field, value in update_data.items():
+            setattr(db_obj, field, value)
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)
@@ -77,7 +75,9 @@ class BaseRepository(Generic[ModelType, T]):
 
     async def remove(self, db: AsyncSession, id: int) -> ModelType:
         result = await db.execute(select(self.model).filter(self.model.id == id))
-        obj = result.scalars().first()
+        obj = result.scalar_one_or_none()
+        if obj is None:
+            raise ValueError("Object not found")
         await db.delete(obj)
         await db.commit()
         return obj

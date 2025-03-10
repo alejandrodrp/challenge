@@ -1,8 +1,11 @@
+from typing import Annotated
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import timedelta
+
 from app.core.auth import (
     authenticate_user, create_token, get_password_hash, get_user,
     ACCESS_TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME, SECRET_KEY, ALGORITHM
@@ -15,8 +18,10 @@ auth_router = APIRouter()
 
 
 @auth_router.post("/token", response_model=dict)
-async def login_for_access_token(db: AsyncSession = Depends(get_session),
-                                 form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(
+        db: Annotated[AsyncSession, Depends(get_session)],
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+) -> dict:
     user = await authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -36,7 +41,10 @@ async def login_for_access_token(db: AsyncSession = Depends(get_session),
 
 
 @auth_router.post("/refresh-token", response_model=dict)
-async def refresh_access_token(refresh_token: dict = Body(...), db: AsyncSession = Depends(get_session)):
+async def refresh_access_token(
+        refresh_token: Annotated[dict, Body(...)],
+        db: Annotated[AsyncSession, Depends(get_session)]
+) -> dict:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -60,7 +68,10 @@ async def refresh_access_token(refresh_token: dict = Body(...), db: AsyncSession
 
 
 @auth_router.post("/register", response_model=UserPublic)
-async def register_user(user: UserCreate, db: AsyncSession = Depends(get_session)):
+async def register_user(
+        user: UserCreate,
+        db: Annotated[AsyncSession, Depends(get_session)]
+) -> UserPublic:
     hashed_password = get_password_hash(user.password)
     db_user = User(
         username=user.username,

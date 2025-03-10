@@ -1,5 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
+from app.views.types.output_input_schemas import OperationSchemaType
+
 
 class CitaBase(BaseModel):
     fecha: date
@@ -10,22 +12,26 @@ class CitaBase(BaseModel):
     paciente_id: int
     doctor_id: int
 
+
 class CitaCreate(CitaBase):
     pass
+
 
 class CitaUpdate(CitaBase):
     pass
 
+
 class CitaInDBBase(CitaBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 class Cita(CitaInDBBase):
     pass
 
-cita_schemas = {
+
+cita_schemas: OperationSchemaType = {
     "get": {"input": CitaBase, "output": CitaInDBBase},
     "post": {"input": CitaBase, "output": CitaInDBBase},
     "put": {"input": CitaBase, "output": CitaInDBBase},

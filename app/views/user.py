@@ -1,4 +1,9 @@
-from pydantic import BaseModel, EmailStr
+from typing import Annotated
+
+from pydantic import BaseModel, EmailStr, ConfigDict, BeforeValidator
+
+from app.views.types.output_input_schemas import OperationSchemaType
+from app.views.validators.password import validate_password
 
 
 class UserBase(BaseModel):
@@ -9,7 +14,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(BaseModel):
-    password: str
+    password: Annotated[str, BeforeValidator(validate_password)]
     username: str
     email: EmailStr
     is_active: bool = True
@@ -22,15 +27,14 @@ class UserUpdate(UserCreate):
 class UserInDBBase(UserBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserPublic(UserBase):
     pass
 
 
-user_schemas = {
+user_schemas: OperationSchemaType = {
     "get": {"input": UserBase, "output": UserInDBBase},
     "post": {"input": UserCreate, "output": UserInDBBase},
     "put": {"input": UserUpdate, "output": UserInDBBase},
